@@ -959,3 +959,164 @@ body {
     box-shadow: 0 0 0 6px var(--accent-soft)
   }
 }
+
+/* โค้ดส่วนลดที่เก็บไว้ในหน้าสั่งซื้อ */
+.mycoupons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius)
+}
+
+.chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap
+}
+
+.chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px dashed var(--accent);
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer
+}
+
+.chip small {
+  color: var(--muted)
+}
+
+.chip em {
+  font-style: normal;
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--accent)
+}
+
+.chip.on {
+  border-style: solid;
+  background: var(--accent);
+  color: #fff
+}
+
+.chip.on small,
+.chip.on em {
+  color: #fff
+}
+
+/* แถวโค้ดส่วนลดในตะกร้า และป๊อปอัพเลือกโค้ด */
+.voucher-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer
+}
+
+.voucher-row:hover {
+  border-color: #cfcfc9
+}
+
+.v-title {
+  font-weight: 600
+}
+
+.v-tags {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px
+}
+
+.vtag {
+  padding: 2px 10px;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: .8rem;
+  white-space: nowrap
+}
+
+.vtag.red {
+  color: var(--danger);
+  border-color: var(--danger)
+}
+
+.vtag.green {
+  color: var(--accent);
+  border-color: var(--accent)
+}
+
+.chev {
+  color: var(--muted);
+  font-size: 1.4rem;
+  line-height: 1
+}
+
+.vlist {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 16px
+}
+
+.vitem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer
+}
+
+.vitem small {
+  color: var(--muted)
+}
+
+.vitem.on {
+  border-color: var(--accent);
+  background: var(--accent-soft)
+}
+
+.vitem:disabled {
+  opacity: .5;
+  cursor: not-allowed
+}
+
+.vitem .radio {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--line)
+}
+
+.vitem.on .radio {
+  border: 6px solid var(--accent)
+}

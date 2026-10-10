@@ -1,12 +1,9 @@
 "use client";
-
-/* ตะกร้าอาหารและการชำระเงิน */
-
-import { useDialog } from "@/components/Dialog";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart, COUPONS } from "@/components/Providers";
+import { useDialog } from "@/components/Dialog";
 
 const PAY: [string, string][] = [["promptpay", "📱 พร้อมเพย์ / QR"], ["card", "💳 บัตรเครดิต/เดบิต"], ["cod", "💵 เก็บเงินปลายทาง"]];
 
@@ -32,11 +29,12 @@ export default function Cart() {
   const dialog = useDialog();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [pay, setPay] = useState("promptpay");
-  const [code, setCode] = useState("");
   const [prof, setProf] = useState<{ address?: string; phone?: string }>({});
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [card, setCard] = useState<Card>({ number: "", name: "", exp: "", cvv: "" });
+  const [open, setOpen] = useState(false);   // ป๊อปอัพเลือกโค้ด
+  const [pick, setPick] = useState("");      // โค้ดที่เลือกไว้ชั่วคราวในป๊อปอัพ
 
   useEffect(() => { try { setProf(JSON.parse(localStorage.getItem("profile") || "{}")); } catch { } }, []);
 
@@ -47,12 +45,23 @@ export default function Cart() {
   const digits = card.number.replace(/\D/g, "");
   const cardValid = digits.length >= 13 && luhn(digits) && card.name.trim().length >= 2 && expOk(card.exp) && /^\d{3,4}$/.test(card.cvv);
 
-  const applyCode = () => {
-    const k = code.trim().toUpperCase();
-    if (COUPONS[k]) c.setCoupon(k);
-    else dialog.alert("ไม่พบโค้ดส่วนลดนี้ กรุณาตรวจสอบอีกครั้ง", { title: "โค้ดไม่ถูกต้อง", kind: "error" });
-  };
+  // ป้ายโค้ดที่ใช้อยู่ แสดงในแถวโค้ดส่วนลด
+  const applied = COUPONS[c.coupon];
+  const tags: { text: string; kind: "red" | "green" }[] = [];
+  if (applied) {
+    if (c.discount > 0) tags.push({ text: `-฿${c.discount}`, kind: "red" });
+    if (applied.freeShip) tags.push({ text: "ส่งฟรี", kind: "green" });
+    if (!tags.length) tags.push({ text: c.coupon, kind: "red" });
+  }
 
+  const canUse = (code: string) => {
+    const cp = COUPONS[code];
+    return !!cp && (!!cp.freeShip || cp.calc(c.subtotal) > 0);
+  };
+  const openCoupons = () => { setPick(c.coupon); setOpen(true); };
+  const confirmCoupon = () => { c.setCoupon(pick); setOpen(false); };
+
+  // ตรวจที่อยู่ก่อนไปขั้นเลือกวิธีชำระเงิน
   const goPayment = async () => {
     if (!prof.address?.trim() || !prof.phone?.trim()) {
       const goProfile = await dialog.confirm(
@@ -107,13 +116,13 @@ export default function Cart() {
         ))}
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
-        <div className="row">
-          <input style={{ margin: 0 }} placeholder="กรอกโค้ดส่วนลด" value={code} onChange={e => setCode(e.target.value)} />
-          <button className="btn" onClick={applyCode}>ใช้โค้ด</button>
-        </div>
-        {c.coupon && <p className="price">ใช้โค้ด {c.coupon} ({COUPONS[c.coupon].label})</p>}
-      </div>
+      <button className="voucher-row" onClick={openCoupons}>
+        <span className="v-title">โค้ดส่วนลด</span>
+        <span className="v-tags">
+          {tags.length ? tags.map(t => <span key={t.text} className={"vtag " + t.kind}>{t.text}</span>) : <span className="muted">เลือกหรือเก็บโค้ด</span>}
+          <span className="chev">›</span>
+        </span>
+      </button>
 
       <div className="card" style={{ marginTop: 12 }}>
         <div className="row"><span>ยอดอาหาร</span><span>฿{c.subtotal}</span></div>
@@ -174,6 +183,37 @@ export default function Cart() {
         <div className="row">
           <button className="btn ghost" onClick={() => setStep(2)}>← กลับ</button>
           <button className="btn" disabled={busy} onClick={submitOrder}>{busy ? "กำลังดำเนินการ..." : "ฉันชำระเงินแล้ว ยืนยัน"}</button>
+        </div>
+      </div>
+    )}
+
+    {open && (
+      <div className="overlay" onClick={() => setOpen(false)}>
+        <div className="modal" onClick={e => e.stopPropagation()}>
+          <button className="close" onClick={() => setOpen(false)} aria-label="ปิด">✕</button>
+          <h3>เลือกโค้ดส่วนลด</h3>
+          {c.collected.length === 0 ? (
+            <p className="muted">ยังไม่มีโค้ดที่เก็บไว้ <Link href="/coupons" className="price">ไปเก็บโค้ด</Link></p>
+          ) : (<>
+            <div className="vlist">
+              {c.collected.map(code => {
+                const cp = COUPONS[code];
+                if (!cp) return null;
+                const ok = canUse(code);
+                return (
+                  <button key={code} disabled={!ok} className={"vitem " + (pick === code ? "on" : "")} onClick={() => setPick(pick === code ? "" : code)}>
+                    <div>
+                      <b>{code}</b>
+                      <div>{cp.label}</div>
+                      <small>{ok ? (cp.freeShip ? "ส่งฟรี" : `ประหยัด ฿${Math.round(cp.calc(c.subtotal))}`) : "ยังไม่ถึงเงื่อนไขขั้นต่ำ"}</small>
+                    </div>
+                    <span className="radio" />
+                  </button>
+                );
+              })}
+            </div>
+            <button className="btn" style={{ width: "100%" }} onClick={confirmCoupon}>ยืนยันการใช้โค้ด</button>
+          </>)}
         </div>
       </div>
     )}

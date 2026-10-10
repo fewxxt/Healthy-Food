@@ -4,14 +4,17 @@ import Link from "next/link";
 
 type LastOrder = { id: string; total: number; pay: string; at?: number };
 
+/* ขั้นตอนการสั่งซื้อที่แสดงในหน้าสั่งซื้อสำเร็จ */
 const STEPS = [
   { title: "รับออเดอร์", desc: "ร้านได้รับคำสั่งซื้อของคุณแล้ว" },
-  { title: "เตรียมสินค้า", desc: "กำลังเตรียมอาหารและบรรจุหีบห่อ" },
+  { title: "เตรียมสินค้า", desc: "กำลังจัดเตรียมอาหาร" },
   { title: "กำลังจัดส่ง", desc: "กำลังนำส่งไปยังที่อยู่ของคุณ" },
   { title: "จัดส่งสำเร็จ", desc: "ส่งอาหารถึงคุณเรียบร้อยแล้ว" },
 ];
 const STEP_MS = 3500; // เวลาต่อหนึ่งขั้นตอน (มิลลิวินาที) สมุติว่าขั้นตอนละ 3.5 วินาที
 
+
+/* หน้าแสดงผลความสำเร็จ */
 export default function Success() {
   const [o, setO] = useState<LastOrder | null>(null);
   const [step, setStep] = useState(0);
