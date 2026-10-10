@@ -23,7 +23,8 @@ export default function Home() {
   return (<>
     <section className="hero">
       <span className="pill">Fresh · Clean · Delivered</span>
-      <h1>อาหารสุขภาพ อร่อย<br />ส่งถึงบ้าน</h1>
+      <h1>อาหารเพื่อสุขภาพ อร่อย สะอาด
+        <br />ส่งตรงถึงบ้าน</h1>
       <p>เลือกเมนูคลีน สลัด อาหารทะเล และอื่นๆ ปรุงสดใหม่ทุกวัน</p>
       <div className="row" style={{ justifyContent: "flex-start" }}>
         <Link href="/order" className="btn">สั่งเลย →</Link>
