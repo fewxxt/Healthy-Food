@@ -10,7 +10,7 @@ const STEPS = [
   { title: "กำลังจัดส่ง", desc: "กำลังนำส่งไปยังที่อยู่ของคุณ" },
   { title: "จัดส่งสำเร็จ", desc: "ส่งอาหารถึงคุณเรียบร้อยแล้ว" },
 ];
-const STEP_MS = 5000; // เวลาต่อหนึ่งขั้นตอน (มิลลิวินาที)
+const STEP_MS = 3500; // เวลาต่อหนึ่งขั้นตอน (มิลลิวินาที) สมุติว่าขั้นตอนละ 3.5 วินาที
 
 export default function Success() {
   const [o, setO] = useState<LastOrder | null>(null);
