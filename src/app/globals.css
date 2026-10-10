@@ -823,9 +823,139 @@ body {
 }
 
 /* แถวรายการในตะกร้า: คอลัมน์ชื่อ / จำนวน / ราคา ตรงกันทุกแถว */
-.cart-row{display:grid;grid-template-columns:minmax(0,1fr) 112px 72px;align-items:center;gap:12px;padding:8px 0}
-.cart-row .qty{justify-content:center}
-.cart-row > b{text-align:right}
+.cart-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px 72px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0
+}
+
+.cart-row .qty {
+  justify-content: center
+}
+
+.cart-row>b {
+  text-align: right
+}
 
 /* กันปุ่มตัดบรรทัด เช่น "ใช้โค้ด" */
-.btn{white-space:nowrap;flex:none}
+.btn {
+  white-space: nowrap;
+  flex: none
+}
+
+/* ตารางโภชนาการในหน้าต่างรายละเอียดเมนู */
+.nutri {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 8px 0 18px
+}
+
+.nutri div {
+  background: var(--accent-soft);
+  border-radius: 12px;
+  padding: 10px 4px;
+  text-align: center
+}
+
+.nutri b {
+  display: block;
+  font-size: 1.15rem;
+  color: var(--accent)
+}
+
+.nutri span {
+  font-size: .72rem;
+  color: var(--muted)
+}
+
+@media(max-width:480px) {
+  .nutri {
+    grid-template-columns: repeat(2, 1fr)
+  }
+}
+
+/* ขั้นตอนติดตามออเดอร์ */
+.track {
+  list-style: none;
+  margin: 16px 0 24px;
+  padding: 0;
+  text-align: left
+}
+
+.track li {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding-bottom: 22px;
+  color: var(--muted)
+}
+
+.track li:last-child {
+  padding-bottom: 0
+}
+
+.track li::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  bottom: 0;
+  width: 2px;
+  background: var(--line)
+}
+
+.track li:last-child::before {
+  display: none
+}
+
+.track .dot {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  font-weight: 600
+}
+
+.track b {
+  display: block
+}
+
+.track small {
+  display: block;
+  color: var(--muted)
+}
+
+.track li.done .dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff
+}
+
+.track li.done::before {
+  background: var(--accent)
+}
+
+.track li.now {
+  color: var(--text)
+}
+
+.track li.now .dot {
+  border-color: var(--accent);
+  color: var(--accent);
+  animation: pulse 1.2s infinite
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: 0 0 0 6px var(--accent-soft)
+  }
+}

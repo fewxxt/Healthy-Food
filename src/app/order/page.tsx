@@ -1,26 +1,19 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
-import { useCart, type Dish } from "@/components/Providers";
+import { useCart } from "@/components/Providers";
+import { foods } from "@/lib/foods";
+import type { Food } from "@/lib/types";
 
-type Detail = Dish & { nameEn: string; area: string; ingredients: { name: string; measure: string }[] };
+const toDish = (f: Food) => ({ id: String(f.id), name: f.name, img: f.image, price: f.price, category: f.categoryName });
 
 export default function Order() {
-  const [menu, setMenu] = useState<Dish[] | null>(null);
   const [cat, setCat] = useState("ทั้งหมด");
-  const [sel, setSel] = useState<Dish | null>(null);
-  const [detail, setDetail] = useState<Detail | null>(null);
+  const [sel, setSel] = useState<Food | null>(null);
   const { data: session } = useSession();
   const { add } = useCart();
 
-  const open = (m: Dish) => {
-    setSel(m);
-    setDetail(null);
-    fetch(`/api/menu/${m.id}`).then(r => r.json()).then(setDetail).catch(() => {});
-  };
-  const addToCart = (m: Dish) => (session ? add(m) : signIn("google"));
-
-  useEffect(() => { fetch("/api/menu").then(r => r.json()).then(setMenu).catch(() => setMenu([])); }, []);
+  const addToCart = (f: Food) => (session ? add(toDish(f)) : signIn("google"));
 
   // กด Esc เพื่อปิดหน้าต่างรายละเอียด
   useEffect(() => {
@@ -31,16 +24,12 @@ export default function Order() {
 
   // มาจากหน้าแรก (/order?item=รหัสเมนู) ให้เปิดรายละเอียดเมนูนั้นทันที
   useEffect(() => {
-    if (!menu) return;
     const id = new URLSearchParams(window.location.search).get("item");
-    const m = menu.find(x => x.id === id);
-    if (m) open(m);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menu]);
+    const f = foods.find(x => String(x.id) === id);
+    if (f) setSel(f);
+  }, []);
 
-  if (!menu) return <p>กำลังโหลดเมนู...</p>;
-
-  const cats = ["ทั้งหมด", ...Array.from(new Set(menu.map(m => m.category ?? "")))];
+  const cats = ["ทั้งหมด", ...Array.from(new Set(foods.map(f => f.categoryName)))];
 
   return (<>
     <h2>สั่งซื้ออาหาร</h2>
@@ -49,13 +38,13 @@ export default function Order() {
     </div>
 
     <div className="grid">
-      {menu.filter(m => cat === "ทั้งหมด" || m.category === cat).map(m => (
-        <div className="card clickable" key={m.id} onClick={() => open(m)}>
-          <img className="food" src={m.img} alt={m.name} />
-          <h4>{m.name}</h4>
+      {foods.filter(f => cat === "ทั้งหมด" || f.categoryName === cat).map(f => (
+        <div className="card clickable" key={f.id} onClick={() => setSel(f)}>
+          <img className="food" src={f.image} alt={f.name} />
+          <h4>{f.name}</h4>
           <div className="row">
-            <span className="price">฿{m.price}</span>
-            <button className="btn" onClick={e => { e.stopPropagation(); addToCart(m); }}>+ ใส่ตะกร้า</button>
+            <span className="price">฿{f.price}</span>
+            <button className="btn" onClick={e => { e.stopPropagation(); addToCart(f); }}>+ ใส่ตะกร้า</button>
           </div>
         </div>
       ))}
@@ -65,21 +54,16 @@ export default function Order() {
       <div className="overlay" onClick={() => setSel(null)}>
         <div className="modal" onClick={e => e.stopPropagation()}>
           <button className="close" onClick={() => setSel(null)} aria-label="ปิด">✕</button>
-          <img className="food" src={sel.img} alt={sel.name} />
+          <img className="food" src={sel.image} alt={sel.name} />
           <h2 style={{ marginBottom: 2 }}>{sel.name}</h2>
-          {detail?.nameEn && <p className="muted" style={{ margin: 0 }}>{detail.nameEn}</p>}
-          <div className="tags">
-            {sel.category && <span>{sel.category}</span>}
-            {detail?.area && <span>🌍 {detail.area}</span>}
+          <div className="tags"><span>{sel.categoryName}</span></div>
+          <h4>คุณค่าทางโภชนาการโดยประมาณ</h4>
+          <div className="nutri">
+            <div><b>{sel.calories}</b><span>พลังงาน (kcal)</span></div>
+            <div><b>{sel.protein}</b><span>โปรตีน (g)</span></div>
+            <div><b>{sel.carbs}</b><span>คาร์โบไฮเดรต (g)</span></div>
+            <div><b>{sel.fat}</b><span>ไขมัน (g)</span></div>
           </div>
-          <h4>ส่วนผสม</h4>
-          {!detail ? <p className="muted">กำลังโหลด...</p> : (
-            <ul className="ing">
-              {detail.ingredients.map((x, i) => (
-                <li key={i}><span>{x.name}</span><span className="muted">{x.measure}</span></li>
-              ))}
-            </ul>
-          )}
           <div className="row">
             <span className="price" style={{ fontSize: "1.4rem" }}>฿{sel.price}</span>
             <button className="btn" onClick={() => { addToCart(sel); setSel(null); }}>+ ใส่ตะกร้า</button>
